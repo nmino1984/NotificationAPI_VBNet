@@ -1,3 +1,5 @@
+using AutoMapper;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using NotificationAPI.Application.DTOs.Requests;
 using NotificationAPI.Application.DTOs.Responses;
@@ -12,11 +14,19 @@ public class NotificationsController : ControllerBase
 {
     private readonly SendNotificationUseCase _sendNotificationUseCase;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IMapper _mapper;
+    private readonly IValidator<SendNotificationRequest> _validator;
 
-    public NotificationsController(SendNotificationUseCase sendNotificationUseCase, IUnitOfWork unitOfWork)
+    public NotificationsController(
+        SendNotificationUseCase sendNotificationUseCase,
+        IUnitOfWork unitOfWork,
+        IMapper mapper,
+        IValidator<SendNotificationRequest> validator)
     {
         _sendNotificationUseCase = sendNotificationUseCase;
         _unitOfWork = unitOfWork;
+        _mapper = mapper;
+        _validator = validator;
     }
 
     [HttpPost("send")]
@@ -24,6 +34,10 @@ public class NotificationsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SendNotification([FromBody] SendNotificationRequest request)
     {
+        var validation = await _validator.ValidateAsync(request);
+        if (!validation.IsValid)
+            return BadRequest(validation.Errors.Select(e => new { error = e.ErrorMessage }));
+
         try
         {
             var response = await _sendNotificationUseCase.ExecuteAsync(request);
@@ -50,7 +64,9 @@ public class NotificationsController : ControllerBase
             var notification = await _unitOfWork.Notifications.GetByIdAsync(id);
             if (notification == null)
                 return NotFound(new { error = $"Notification with ID {id} not found" });
-            return Ok(notification);
+
+            var response = _mapper.Map<NotificationResponse>(notification);
+            return Ok(response);
         }
         catch (Exception)
         {
@@ -65,7 +81,8 @@ public class NotificationsController : ControllerBase
         try
         {
             var notifications = await _unitOfWork.Notifications.GetByUserIdAsync(userId);
-            return Ok(notifications);
+            var responses = _mapper.Map<IEnumerable<NotificationResponse>>(notifications);
+            return Ok(responses);
         }
         catch (Exception)
         {

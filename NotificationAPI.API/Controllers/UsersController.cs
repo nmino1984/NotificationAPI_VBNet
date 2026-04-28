@@ -1,4 +1,5 @@
 using AutoMapper;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using NotificationAPI.Application.DTOs.Requests;
 using NotificationAPI.Application.DTOs.Responses;
@@ -15,12 +16,18 @@ public class UsersController : ControllerBase
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly GetUserByIdUseCase _getUserByIdUseCase;
+    private readonly IValidator<CreateUserRequest> _validator;
 
-    public UsersController(IUnitOfWork unitOfWork, IMapper mapper, GetUserByIdUseCase getUserByIdUseCase)
+    public UsersController(
+        IUnitOfWork unitOfWork,
+        IMapper mapper,
+        GetUserByIdUseCase getUserByIdUseCase,
+        IValidator<CreateUserRequest> validator)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _getUserByIdUseCase = getUserByIdUseCase;
+        _validator = validator;
     }
 
     [HttpPost]
@@ -28,6 +35,10 @@ public class UsersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request)
     {
+        var validation = await _validator.ValidateAsync(request);
+        if (!validation.IsValid)
+            return BadRequest(validation.Errors.Select(e => new { error = e.ErrorMessage }));
+
         try
         {
             var user = _mapper.Map<User>(request);

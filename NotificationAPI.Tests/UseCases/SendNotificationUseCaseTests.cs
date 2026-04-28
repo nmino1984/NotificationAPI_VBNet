@@ -23,6 +23,7 @@ public class SendNotificationUseCaseTests
     [Fact]
     public async Task ExecuteAsync_ValidRequest_ReturnsNotificationResponse()
     {
+        // Arrange
         var userId = Guid.NewGuid();
         var notifId = Guid.NewGuid();
         var request = new SendNotificationRequest(userId, "Hello", "World message");
@@ -35,8 +36,10 @@ public class SendNotificationUseCaseTests
         _mapperMock.Setup(m => m.Map<NotificationResponse>(notification)).Returns(expected);
         _notifRepoMock.Setup(r => r.AddAsync(notification)).Returns(Task.CompletedTask);
 
+        // Act
         var result = await _useCase.ExecuteAsync(request);
 
+        // Assert
         Assert.Equal(notifId, result.Id);
         Assert.Equal("Hello", result.Title);
     }
@@ -44,10 +47,12 @@ public class SendNotificationUseCaseTests
     [Fact]
     public async Task ExecuteAsync_UserNotFound_ThrowsInvalidOperationException()
     {
+        // Arrange — user does not exist in the repository
         var userId = Guid.NewGuid();
         var request = new SendNotificationRequest(userId, "Hello", "World message");
         _userRepoMock.Setup(r => r.GetByIdAsync(userId)).ReturnsAsync((User)null);
 
+        // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(() => _useCase.ExecuteAsync(request));
     }
 }

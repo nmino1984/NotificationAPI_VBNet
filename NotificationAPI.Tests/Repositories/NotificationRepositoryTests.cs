@@ -18,6 +18,7 @@ public class NotificationRepositoryTests
     [Fact]
     public async Task GetByUserIdAsync_ReturnsOrderedByCreatedAtDescending()
     {
+        // Arrange — two notifications with different timestamps for the same user
         var dbName = Guid.NewGuid().ToString();
         var userId = Guid.NewGuid();
 
@@ -44,10 +45,13 @@ public class NotificationRepositoryTests
             await ctx.SaveChangesAsync();
         }
 
+        // Act
         using (var ctx = CreateContext(dbName))
         {
             var repo = new NotificationRepository(ctx);
             var results = (await repo.GetByUserIdAsync(userId)).ToList();
+
+            // Assert — newest notification comes first
             Assert.Equal(2, results.Count);
             Assert.Equal(newer.Id, results[0].Id);
         }
@@ -56,6 +60,7 @@ public class NotificationRepositoryTests
     [Fact]
     public async Task GetByUserIdAsync_FiltersDeletedNotifications()
     {
+        // Arrange — one active notification and one soft-deleted notification
         var dbName = Guid.NewGuid().ToString();
         var userId = Guid.NewGuid();
 
@@ -82,6 +87,7 @@ public class NotificationRepositoryTests
             await ctx.SaveChangesAsync();
         }
 
+        // Act & Assert — only the active notification is returned
         using (var ctx = CreateContext(dbName))
         {
             var repo = new NotificationRepository(ctx);

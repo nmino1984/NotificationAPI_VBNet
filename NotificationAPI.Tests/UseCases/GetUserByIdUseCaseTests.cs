@@ -21,6 +21,7 @@ public class GetUserByIdUseCaseTests
     [Fact]
     public async Task ExecuteAsync_UserExists_ReturnsUserResponse()
     {
+        // Arrange
         var userId = Guid.NewGuid();
         var user = new User { Id = userId, Name = "John Doe", Email = "john@example.com" };
         var expected = new UserResponse { Id = userId, Name = "John Doe", Email = "john@example.com" };
@@ -28,8 +29,10 @@ public class GetUserByIdUseCaseTests
         _userRepoMock.Setup(r => r.GetByIdAsync(userId)).ReturnsAsync(user);
         _mapperMock.Setup(m => m.Map<UserResponse>(user)).Returns(expected);
 
+        // Act
         var result = await _useCase.ExecuteAsync(userId);
 
+        // Assert
         Assert.Equal(userId, result.Id);
         Assert.Equal("John Doe", result.Name);
     }
@@ -37,9 +40,11 @@ public class GetUserByIdUseCaseTests
     [Fact]
     public async Task ExecuteAsync_UserNotFound_ThrowsInvalidOperationException()
     {
+        // Arrange — repository returns null (user does not exist)
         var userId = Guid.NewGuid();
         _userRepoMock.Setup(r => r.GetByIdAsync(userId)).ReturnsAsync((User)null);
 
+        // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(() => _useCase.ExecuteAsync(userId));
     }
 }
