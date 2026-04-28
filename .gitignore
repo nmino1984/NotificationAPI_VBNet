@@ -1,0 +1,34 @@
+# Build output
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# SQLite databases
+*.db
+*.db-shm
+*.db-wal
+
+# NuGet
+*.nupkg
+.nuget/
+packages/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# dotnet publish
+publish/
+
+# Claude Code local settings
+.claude/
