@@ -49,9 +49,13 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    // HTTPS redirect only in development — production SSL is terminated by the reverse proxy (Railway/nginx)
+    app.UseHttpsRedirection();
 }
 
-app.UseHttpsRedirection();
+// Health check endpoint for container orchestration
+app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
+
 app.UseAuthorization();
 app.MapControllers();
 

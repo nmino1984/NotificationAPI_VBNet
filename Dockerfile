@@ -32,14 +32,14 @@ WORKDIR /app
 # Copy published files from build stage
 COPY --from=build /app/publish .
 
-# Expose ports
-EXPOSE 5000
-EXPOSE 7000
+# Production environment — Railway/nginx handle HTTPS termination at proxy level
+ENV ASPNETCORE_ENVIRONMENT=Production
+ENV ASPNETCORE_URLS=http://+:5000
 
-# Health check
+EXPOSE 5000
+
+# Health check against the actual /health endpoint
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:5000/health || exit 1
 
-# Run application
 ENTRYPOINT ["dotnet", "NotificationAPI.API.dll"]
-CMD ["--urls", "http://0.0.0.0:5000;https://0.0.0.0:7000"]
