@@ -1,6 +1,6 @@
 <Solution>
-  <Project Path="NotificationAPI.API/NotificationAPI.API.vbproj" />
+  <Project Path="NotificationAPI.API/NotificationAPI.API.csproj" />
   <Project Path="NotificationAPI.Application/NotificationAPI.Application.vbproj" />
   <Project Path="NotificationAPI.Domain/NotificationAPI.Domain.vbproj" />
-  <Project Path="NotificationAPI.Infrastructure/NotificationAPI.Infrastructure.vbproj" />
+  <Project Path="NotificationAPI.Infrastructure/NotificationAPI.Infrastructure.csproj" />
 </Solution>
